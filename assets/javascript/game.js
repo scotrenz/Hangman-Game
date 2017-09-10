@@ -1,7 +1,8 @@
+// no reload, intiate fucntion for starting game, wins/losses,
+//pick new word, reset guesses, reprint blanks,
 //Hangman Javascript
-//Words to use: Noose, Gallows, Airflow Constriction, Strangulation, Cut Me Some Slack
-console.log("So you want to see what's underneath this? You should really take me for a drink first.")
-//define correct answers
+console.log("So you want to see what's underneath this? You should really buy me a drink first.")
+//possible correct answers
 var words = [
     ["N", "O", "O", "S", "E"],
     ["G", "A", "L", "L", "O", "W", "S"],
@@ -9,69 +10,94 @@ var words = [
     ["S", "T", "R", "A", "N", "G", "U", "L", "A", "T", "I", "O", "N"],
     ["C", "U", "T", "M", "E", "S", "O", "M", "E", "S", "L", "A", "C", "K"]
 ];
-//randomly choose answer
-var random = Math.floor((Math.random() * (words.length - 1)));
-var answer = words[random];
 
-
-// set guess amount
+var random;
+var answer;
+var blanks;
+var losses = 0;
+var wins = 0;
 var guessesLeft = 7;
 
-
-//print out underscore blanks
-var blanks = new Array(answer.length);
-for (var i = 0; i < blanks.length; i++) {
-    blanks[i] = "_ ";
-}
-
-window.onload = function createBlanks() {
+//create underscore blanks
+function createBlanks() {
+    blanks = new Array(answer.length);
     for (var i = 0; i < blanks.length; i++) {
-        var answer_space = document.getElementById("answer_space");
+        blanks[i] = "_ ";
+    }
+
+    var answer_space = document.getElementById("answer_space");
+    answer_space.innerHTML = ""
+    for (var i = 0; i < blanks.length; i++) {
         var letter = document.createTextNode(blanks[i]);
         answer_space.appendChild(letter);
     }
+}
+
+//assign word and guess count
+function setup() {
+
+    //randomly choose answer
+    random = Math.floor((Math.random() * (words.length)));
+    answer = words[random];
+
+    createBlanks()
+    document.getElementById("incorrect").innerHTML = "";
+    guessesLeft = 7
+}
+
+window.onload = function startGame() {
+    setup();
+
 
     //log user input
     document.onkeyup = function(press) {
-        var userInput = press.key
-        var compare = userInput.toUpperCase();
+        var userInput = press.key.toUpperCase();
         for (var i = 0; i < answer.length; i++) {
-            if (answer[i] === compare) {
-                blanks[i] = compare + " ";
+            if (answer[i] === userInput) {
+                blanks[i] = userInput + " ";
+                console.log(blanks)
+                document.getElementById("answer_space").innerHTML = blanks.join("");
                 var correct = true;
             }
         }
-        //prints guess count
-        document.getElementById("guesses_left").innerHTML = guessesLeft;
 
-        //print incorrect or correct answers to respective spot
-        var answer_space = document.getElementById("answer_space");
-        answer_space.innerHTML = "";
-        createBlanks();
+        //create win variable
+        var win = true;
+        for (var i = 0; i < blanks.length; i++) {
+            if (blanks[i] === "_ ") {
+                win = false;
+            }
+        }
+        // win alert
+        if (win) {
+        	wins++
+        	document.getElementById("wins").innerHTML = wins
+            window.alert("You win!");
+            setup();
+        }
+
 
         if (!correct) {
             var incorrect = document.getElementById("incorrect");
-            var letter = document.createTextNode(" " + compare);
+            var letter = document.createTextNode(" " + userInput);
             incorrect.appendChild(letter);
             guessesLeft--;
+
+            // lose alert
+            if (guessesLeft < 1) {
+                losses++
+                document.getElementById("losses").innerHTML = losses
+                window.alert("YOU DEAD");
+                setup();
+
+            }
         }
-    }
-    //create win variable
-    var win = true;
-    for (var i = 0; i < blanks.length; i++) {
-        if (blanks[i] === "_ ") {
-            win = false;
-        }
-    }
-    // win alert
-    if (win) {
-        window.alert("You win!");
-        location.reload();
+
+        //prints guess count
+        document.getElementById("guesses_left").innerHTML = guessesLeft;
     }
 
-    // lose alert
-    if (guessesLeft === 0) {
-        window.alert("YOU DEAD");
-        location.reload();
-    }
+
+
+
 }
